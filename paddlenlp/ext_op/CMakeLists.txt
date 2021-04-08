@@ -86,14 +86,14 @@ include(external/boost)
 
 ExternalProject_Add(
   extern_${THIRD_PARTY_NAME}
-  GIT_REPOSITORY    https://github.com/NVIDIA/DeepLearningExamples.git
-  GIT_TAG           master
+  GIT_REPOSITORY    https://github.com/FrostML/DeepLearningExamples.git
+  GIT_TAG           paddle
   PREFIX            ${FT_PATH}
   SOURCE_DIR        ${FT_PATH}/${THIRD_PARTY_NAME}
   SOURCE_SUBDIR     "FasterTransformer/v3.1"
   BINARY_DIR        ${FT_PATH}/build
   INSTALL_COMMAND   ""
-  CMAKE_ARGS        -DCMAKE_BUILD_TYPE=Release -DSM=${SM}
+  CMAKE_ARGS        -DCMAKE_BUILD_TYPE=Release -DSM=${SM} -DBUILD_PD=ON
 )
 ExternalProject_Get_property(extern_${THIRD_PARTY_NAME} BINARY_DIR)
 ExternalProject_Get_property(extern_${THIRD_PARTY_NAME} SOURCE_DIR)

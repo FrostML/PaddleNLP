@@ -21,9 +21,19 @@
 using namespace paddle_infer;
 
 
-std::string model_dir = "";
-std::string dict_dir = "";
-std::string datapath = "";
+// std::string model_dir = "";
+// std::string dict_dir = "";
+// std::string datapath = "";
+std::string model_dir =
+    "/paddle/fast_transformer/new/PaddleNLP/examples/machine_translation/"
+    "transformer/faster_transformer/infer_model/";
+std::string dict_dir =
+    "/paddle/cache/.paddlenlp/datasets/WMT14ende/WMT14.en-de/"
+    "wmt14_ende_data_bpe/vocab_all.bpe.33708";
+std::string datapath =
+    "/paddle/cache/.paddlenlp/datasets/WMT14ende/WMT14.en-de/"
+    "wmt14_ende_data_bpe/newstest2014.tok.bpe.33708.en";
+
 
 const int eos_idx = 1;
 const int pad_idx = 0;
@@ -181,7 +191,7 @@ void Main(int batch_size, int gpu_id) {
   config.SetModel(model_dir + "/transformer.pdmodel",
                   model_dir + "/transformer.pdiparams");
 
-  config.EnableUseGpu(2000, gpu_id);
+  config.EnableUseGpu(0, gpu_id);
 
   config.SwitchUseFeedFetchOps(false);
   config.SwitchSpecifyInputNames(true);
@@ -196,6 +206,7 @@ void Main(int batch_size, int gpu_id) {
   std::ofstream out("predict.txt");
 
   while (reader.NextBatch(predictor, batch_size, source_query_vec)) {
+    break;
     timer.tic();
     predictor->Run();
     std::vector<DataResult> dataresultvec;
@@ -225,9 +236,9 @@ int main(int argc, char** argv) {
   batch_size = std::stoi(std::string(argv[1]));
   gpu_id = std::stoi(std::string(argv[2]));
 
-  model_dir = std::string(argv[3]);
-  dict_dir = std::string(argv[4]);
-  datapath = std::string(argv[5]);
+  // model_dir = std::string(argv[3]);
+  // dict_dir = std::string(argv[4]);
+  // datapath = std::string(argv[5]);
 
   paddle::inference::Main(batch_size, gpu_id);
 
