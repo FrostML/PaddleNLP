@@ -45,15 +45,27 @@ class Demo:
         logger.info('Model loaded.')
 
     # prediction function
-    def predict(self, text):
-        ids = self.tokenizer(text)["input_ids"]
+    def predict(self, text, batch_size=1):
+        place = paddle.set_device("gpu")
+
+        ids = tokenizer.convert_tokens_to_ids("<|endoftext|>")
         input_ids = paddle.to_tensor(
-            np.array(ids).reshape(1, -1).astype('int64'))
+            np.array([ids for _ in range(batch_size)]).reshape(batch_size, -1)
+            .astype('int64'))
+
+        import time
+        for i in range(100):
+            if i == 50:
+                paddle.fluid.core._cuda_synchronize(place)
+                start = time.time()
         out = self.model(input_ids, self.tokenizer.stop_token_id)
-        out = [int(x) for x in out.numpy().reshape([-1])]
-        logger.info(self.tokenizer.convert_ids_to_string(out))
+        paddle.fluid.core._cuda_synchronize(place)
+        print("Avg latency: {}ms. ".format((time.time() - start) / 50 * 1000))
+        # out = [int(x) for x in out.numpy().reshape([-1])]
+        # logger.info(self.tokenizer.convert_ids_to_string(out))
 
     # One shot example
+
     def ask_question_cn(self, question):
         self.predict("问题：中国的首都是哪里？答案：北京。\n问题：%s 答案：" % question)
 
@@ -68,10 +80,11 @@ class Demo:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "gpt-cn":
-        demo = Demo("gpt-cn", "gpt-cpm-large-cn")
-        demo.ask_question_cn("苹果的CEO是谁?")
-        demo.dictation_poetry_cn("举杯邀明月，")
-    else:
-        demo = Demo("gpt", "gpt2-medium-en")
-        demo.ask_question_en("Who is the CEO of Apple?")
+    # if len(sys.argv) > 1 and sys.argv[1] == "gpt-cn":
+    #     demo = Demo("gpt-cn", "gpt-cpm-large-cn")
+    #     demo.ask_question_cn("苹果的CEO是谁?")
+    #     demo.dictation_poetry_cn("举杯邀明月，")
+    # else:
+    demo = Demo("gpt", "gpt2-medium-en", max_predict_len=32)
+    demo.predict("", eval(sys.argv[1]))
+    # demo.ask_question_en("Who is the CEO of Apple?")
