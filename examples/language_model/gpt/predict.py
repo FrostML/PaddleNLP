@@ -48,9 +48,9 @@ class Demo:
     def predict(self, text, batch_size=1):
         place = paddle.set_device("gpu")
 
-        ids = tokenizer.convert_tokens_to_ids("<|endoftext|>")
+        ids = self.tokenizer.convert_tokens_to_ids("<|endoftext|>")
         input_ids = paddle.to_tensor(
-            np.array([ids for _ in range(batch_size)]).reshape(batch_size, -1)
+            np.array([ids for _ in range(batch_size)]).reshape(batch_size, 1)
             .astype('int64'))
 
         import time
@@ -58,7 +58,7 @@ class Demo:
             if i == 50:
                 paddle.fluid.core._cuda_synchronize(place)
                 start = time.time()
-        out = self.model(input_ids, self.tokenizer.stop_token_id)
+            out = self.model(input_ids, self.tokenizer.stop_token_id)
         paddle.fluid.core._cuda_synchronize(place)
         print("Avg latency: {}ms. ".format((time.time() - start) / 50 * 1000))
         # out = [int(x) for x in out.numpy().reshape([-1])]
